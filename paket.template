@@ -1,0 +1,25 @@
+type project
+title
+    CMP6090
+owners
+    Thomas Gardiner <Thomas.Gardiner3@mail.bcu.ac.uk>
+authors 
+    Thomas Gardiner <Thomas.Gardiner3@mail.bcu.ac.uk>
+projectUrl
+    https://github.com/TomboFry/CMP6090
+iconUrl
+    https://tombofry.co.uk/tombofry.jpg
+licenseUrl
+    https://github.com/TomboFry/CMP6090/blob/master/LICENSE
+requireLicenseAcceptance
+    false
+copyright
+    Copyright 2015
+tags
+    coursework uni
+summary
+    Functional Programming Uni Coursework
+description
+    Functional Programming Uni Coursework
+
+
