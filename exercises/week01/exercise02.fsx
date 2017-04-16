@@ -30,7 +30,8 @@ let implies p q =
 
 // Test:
 
-let outputA = implies true true // Expected true
-let outputB = implies true false // Expected false
+let outputA = implies true true
+let outputB = implies true false
 
+// Expected: `true, false`
 printfn "%b, %b" outputA outputB

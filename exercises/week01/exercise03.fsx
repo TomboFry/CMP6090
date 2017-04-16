@@ -24,13 +24,18 @@ let halfadder a b =
  match (a, b) with
  | (false, false) -> (false, false) // Again, stating each match explicitly.
  | (false, true)  -> (false, true)  // Though this time, we are returning a
- | (true, false)  -> (false, true)  //   tuple in order to get that 
+ | (true, false)  -> (false, true)  // tuple in order to get that
  | (true, true)   -> (true, false)
 
 // Test:
 
-let (outputAA, outputAB) = halfadder true false
-let (outputBA, outputBB) = halfadder true true
+let outputAA, outputAB = halfadder true false
+let outputBA, outputBB = halfadder true true
 
+// Expected:
+// ```
+// (false, true)
+// (true, false)
+// ```
 printfn "(%b, %b)" outputAA outputAB
 printfn "(%b, %b)" outputBA outputBB

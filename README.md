@@ -18,3 +18,8 @@ The exercises are structured in folders as such:
     - exercise##.fs[x]
 
 While the main tasks will have their own named folders in the root.
+
+## Disclaimer
+
+Each of these programmes is indented with only 1 space. This is because I am a
+tab user, and to hell with being **forced** to use spaces in F#...

@@ -11,9 +11,10 @@
 let rec readline() =
  match System.Double.TryParse(System.Console.ReadLine()) with
  | (true, index) -> index
- | _ -> readline()
+ | _ -> printf "Not a valid number! Try again:\n> "
+        readline()
 
-let userint(args:string[], idx:int) =
+let userint (args:string[]) idx =
  if args.Length > idx then
   try
    float args.[idx]
@@ -27,8 +28,8 @@ let userint(args:string[], idx:int) =
 [<EntryPoint>]
 let main args =
  printfn "Multiply two numbers together"
- let numA = userint(args, 0)
- let numB = userint(args, 1)
+ let numA = userint args 0
+ let numB = userint args 1
 
  let result = numA * numB
  printfn "\n%f" result
