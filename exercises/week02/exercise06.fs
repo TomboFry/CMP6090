@@ -21,7 +21,7 @@
 
 // Solution:
 
-let rec gcd (x:uint32) (y:uint32) =
+let rec gcd x y =
  if y = 0u then
   x
  elif y > 0u then
