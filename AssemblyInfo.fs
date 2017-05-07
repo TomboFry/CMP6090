@@ -4,7 +4,7 @@ open System.Reflection
 
 [<assembly: AssemblyTitleAttribute("CMP6090")>]
 [<assembly: AssemblyProductAttribute("CMP6090")>]
-[<assembly: AssemblyDescriptionAttribute("Functional Programming Uni Coursework")>]
+[<assembly: AssemblyDescriptionAttribute("CMP6090")>]
 [<assembly: AssemblyVersionAttribute("1.0")>]
 [<assembly: AssemblyFileVersionAttribute("1.0")>]
 [<assembly: AssemblyConfigurationAttribute("Release")>]
@@ -13,7 +13,7 @@ do ()
 module internal AssemblyVersionInformation =
     let [<Literal>] AssemblyTitle = "CMP6090"
     let [<Literal>] AssemblyProduct = "CMP6090"
-    let [<Literal>] AssemblyDescription = "Functional Programming Uni Coursework"
+    let [<Literal>] AssemblyDescription = "CMP6090"
     let [<Literal>] AssemblyVersion = "1.0"
     let [<Literal>] AssemblyFileVersion = "1.0"
     let [<Literal>] AssemblyConfiguration = "Release"

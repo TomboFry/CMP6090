@@ -44,12 +44,13 @@
     <Content Include="any/netstandard1.6/FSharp.Core.sigdata">
       <Paket>True</Paket>
     </Content>
-    <Compile Include="Script.fsx" />
     <None Include="paket.references" />
     <None Include="paket.template" />
     <Content Include="App.config" />
-    <Compile Include="exercises/week01/exercise04.fs" />
-    <Compile Include="exercises/week01/exercise05.fs" />
+    <Compile Include="ParserLibrary.fs" />
+    <Compile Include="AbstractSyntaxTree.fs" />
+    <Compile Include="TOMParser.fs" />
+    <Compile Include="Project.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Choose>
