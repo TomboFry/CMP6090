@@ -2,45 +2,45 @@ module AbstractSyntaxTree
 
 type Name = string
 
-type Value =
-    | VString of string
-    | VBool of bool
-    | VNumber of float
-    | VArray of Value list
-    | VNull
+type Atomic =
+    | String of string
+    | Bool of bool
+    | Number of float
+    | Array of Atomic list
+    | Null
 
-let VNumber str =
+let Number str =
     match System.Double.TryParse(str) with
-    | (true, float) -> VNumber float
-    | _ -> VNumber 0.0
+    | (true, float) -> Number float
+    | _ -> Number 0.0
 
 type VariableName = VariableName of Name
 
-type OperatorLogical =
-    | And
-    | Or
+type Logical =
+    | And              // &&
+    | Or               // ||
 
-type OperatorComparison =
-    | Equal
-    | LessThan
-    | LessThanEqual
-    | GreaterThan
-    | GreaterThanEqual
-    | NotEqual
+type Comparison =
+    | Equal            // ==
+    | LessThan         // <
+    | LessThanEqual    // <=
+    | GreaterThan      // >
+    | GreaterThanEqual // >=
+    | NotEqual         // !=
 
-type OperatorMaths =
-    | Plus
-    | Minus
-    | Multiply
-    | Divide
+type Maths =
+    | Plus             // +
+    | Minus            // -
+    | Multiply         // *
+    | Divide           // /
 
 type Operator =
-    | Logical of OperatorLogical       // &&, ||
-    | Comparison of OperatorComparison // ==, <, <=, >, >=, !=
-    | Maths of OperatorMaths           // +, -, *, /
+    | Logical of Logical
+    | Comparison of Comparison
+    | Maths of Maths
 
 type Expression =
-    | Atomic of Value
+    | Atomic of Atomic
     | EVariable of VariableName
     | Operation of Expression * Operator * Expression
     | EFnCall of FunctionCall
@@ -51,6 +51,7 @@ type Variable = Variable of VariableName * Expression
 
 type Statement =
     | Definition of Variable
+    | VariableSet of Variable
     | If of Expression * StatementBlock
     | ForEach of VariableName * Expression * StatementBlock
     | While of Expression * StatementBlock

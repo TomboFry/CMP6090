@@ -1,0 +1,68 @@
+       <TOM-Parser> ::= <function> | <function> <TOM-Parser>
+         <function> ::= "fn" <name> "(" <parameters-def> ")" <statement-block>
+   <parameters-def> ::= <variable-name> | <variable-name> "," <parameters-def>
+  <parameters-call> ::= <expression> | <expression> "," <parameters-call>
+    <function-call> ::= <name> "(" <parameters-call> ");"
+
+  <statement-block> ::= <statement> | "{" <statements> "}"
+       <statements> ::= <statement> | <statement> <statements>
+        <statement> ::= <variable-definition
+                      | <variable-set>
+                      | <if-statement>
+                      | <foreach-statement>
+                      | <while-statement>
+                      | <function-call>
+                      | <return-statement>
+
+     <variable-def> ::= "var" <variable-set>
+     <variable-set> ::= <variable-name> "=" <expression> ";"
+    <variable-name> ::= "$" <name>
+
+     <if-statement> ::= "if" <expression> <statement-block>
+<foreach-statement> ::= "foreach (" <variable-name> "in"
+                        <expression> ")" <statement-block>
+  <while-statement> ::= "while" <expression> <statement-block>
+ <return-statement> ::= "return" <opt-expression> ";"
+
+       <expression> ::= <atomic>
+                      | <variable-name>
+                      | <function-call>
+                      | "(" <expression> <operator> <expression> ")"
+   <opt-expression> ::= "" | <expression>
+
+         <operator> ::= <op-logical> | <op-comparison> | <op-maths>
+       <op-logical> ::= "&&" | "||"
+    <op-comparison> ::= "==" | "<" | "<=" | ">" | ">=" | "!="
+         <op-maths> ::= "+" | "-" | "*" | "/"
+
+           <atomic> ::= <bool> | <string> | <number> | <array> | "null"
+             <bool> ::= "true" | "false"
+           <string> ::= '"' <string-part> '"'
+      <string-part> ::= <character> | <character> <string-part>
+        <character> ::= <alphanumeric> | <symbol>
+             <name> ::= <letter> | <letter> <name-part>
+        <name-part> ::= <alphanumeric> | <alphanumeric> <name-part>
+
+           <number> ::= <opt-sign> <many-digits> <opt-float>
+         <opt-sign> ::= "" | "+" | "-"
+        <opt-float> ::= "" | "." <many-digits>
+      <many-digits> ::= <digit> | <digit> <many-digits>
+
+            <array> ::= "[" <many-atomic> "]"
+      <many-atomic> ::= "" | <many-atomic-part>
+ <many-atomic-part> ::= <atomic> | <atomic> "," <many-atomic-part>
+
+     <alphanumeric> ::= <letter> | <digit>
+           <letter> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I"
+                      | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R"
+                      | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a"
+                      | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+                      | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s"
+                      | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+
+            <digit> ::= "0" | "1" | "2" | "3" | "4"
+                      | "5" | "6" | "7" | "8" | "9"
+
+           <symbol> ::= "'" | "$" | ";" | "," | "=" | "[" | "]" | "<" | ">"
+                      | "{" | "}" | "(" | "}" | "+" | "!" | "/" | "\" | "*"
+                      | ":" | "-" | "_" | "?" | " "

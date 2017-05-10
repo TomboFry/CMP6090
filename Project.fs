@@ -7,10 +7,8 @@ open System
 let parseFile filePath str =
     printfn "\n\nPARSING FILE: %s\n" filePath
 
-    let tomParser = parseOneOrMore parseFunction
-
     let rec inner input =
-        let result = parse tomParser input
+        let result = runParser input
         match result with
         | Err (label, err) ->
             printfn "Could not parse\n%s\nError:\n%s" label err 

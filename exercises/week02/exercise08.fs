@@ -23,7 +23,8 @@ let revLine (s:string) = System.String(s.ToCharArray() |> Array.rev)
 let revFile filePath =
  try
   let lines = System.IO.File.ReadLines(filePath)
-  lines |> Seq.iter (fun x -> printfn "%s" (revLine x))
+  lines
+  |> Seq.iter (fun x -> printfn "%s" (revLine x))
  with
  | :? System.IO.FileNotFoundException -> printfn "rev: Cannot open %s: No such file or directory" filePath
 

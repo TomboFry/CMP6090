@@ -45,7 +45,7 @@ type Result<'a> =
 
     member this.isErr =
         // "Consider changing `isErr` to Pascal case"
-        // How about shut up, and not give Title Case a stupid name.
+        // How about shut up, and also not give Title Case a stupid name.
         match this with
         | Err _ -> true
         | _ -> false
@@ -208,23 +208,37 @@ let parseOptional pA =
     
     Parser parser pA.label
 
+/// Infix notation for setting the label on a parser.
+/// Returns a new Parser with the same function but different label
+let ( |>? ) parser newLabel =
+    let newParser input =
+        let result = parse parser input
+        match result with
+        | Ok _ -> result
+        | Err (_, err) ->
+            Err (newLabel, err)
+    { func = newParser; label = newLabel; }
+
 /// Run two parsers that both need to succeed,
 /// but discard whatever's on the left
 let parseKeepLeft pA pB =
     parseAnd pA pB
     |> parserApply (fun (a, _) -> a)
+    |>? pA.label
 
 /// Run two parsers that both need to succeed,
 /// but discard whatever's on the right.
 let parseKeepRight pA pB =
     parseAnd pA pB
     |> parserApply (fun (_, b) -> b)
+    |>? pB.label
 
 
 /// Takes in three parsers and only returns the result of the middle one
 /// (Useful for quotes, brackets, and whitespace)
 let parseBetween pA pB pC =
     parseKeepLeft (parseKeepRight pA pB) pC
+    |>? pB.label
 
 /// Convert a list of parsers into a single parser, making sure any one of
 /// them succeed.
@@ -268,7 +282,7 @@ let parseStringList (stringList:string list) =
 /// Create infix notation for various methods here to make life easier
 let ( ++ ) = parseAnd               // ++ makes sure both sides parse
 
-let ( <|> ) = parseOr               // ? makes sure either side parses
+let ( <|> ) = parseOr               // <|> makes sure either side parses
 
 let ( /> ) = parseKeepRight         // >> Parse both but only keep right side
 
@@ -280,22 +294,19 @@ let ( |>> )(parser:Parser<'a>) func = // Apply a function to the result returned
 let ( |>>% ) parser output =         // When we don't care about the output of 
     parser |>> (fun _ -> output)     // the parser
 
-/// Infix notation for setting the label on a parser.
-/// Returns a new Parser with the same function but different label
-let ( |>? ) parser newLabel =
-    let newParser input =
-        let result = parse parser input
-        match result with
-        | Ok _ -> result
-        | Err (_, err) ->
-            Err (newLabel, err)
-    { func = newParser; label = newLabel; }
-
+/// Parse something **at least once** followed by a separator parser, excluding
+/// the last element.
+/// eg. parser = "ab", separator = ','
+/// Returns Successfully: `ab,ab,ab`
 let parseSeq parser separator =
     parser ++ parseMany (separator /> parser)
     |>> fun (p, pList) -> p::pList
     |>? parser.label + " [" + separator.label + parser.label + "]"
 
+/// Parse something **zero or more** times followed by a separator parser,
+/// excluding the last element
+/// eg. parser = "ab", separator = ','
+/// Returns Successfully: `ab,ab,ab`
 let parseSeqMany parser separator =
     let pSeq = parseSeq parser separator
     parseParserList [
@@ -303,6 +314,15 @@ let parseSeqMany parser separator =
         parserCreate [];
     ]
     |>? pSeq.label
+
+
+let optToStr (pA:Parser<string option>) =
+    pA
+    |>> (fun res ->
+        match res with
+        | None -> ""
+        | Some str -> str
+    )
 
 /// Create a reference to a parser we have not yet created, so we can have
 /// parsers inside themselves. Essentially forward referencing.

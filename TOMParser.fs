@@ -10,7 +10,7 @@ open AbstractSyntaxTree
 *)
 
 let parseExpression, parseExpressionRef = createParserReference<Expression>
-let parseValue, parseValueRef = createParserReference<Value>
+let parseValue, parseValueRef = createParserReference<Atomic>
 let parseStatement, parseStatementReference = createParserReference<Statement>
 
 (*
@@ -73,25 +73,33 @@ let comma = parseChar ','
 let equals = parseChar '='
 /// !
 let exclamation = parseChar '!'
+/// ?
+let questionMark = parseChar '?'
 /// +
 let plus = parseChar '+'
+/// +
+let minus = parseChar '-'
 /// *
 let asterisk = parseChar '*'
+/// _
+let underscore = parseChar '_'
 
-let stringChars = parseParserList [
-                        apostrophe; dollar; semiColon; comma; equals;
-                        bkSqLeft; bkSqRight; bkAgLeft; bkAgRight;
-                        bkClLeft; bkClRight; bkLeft; bkRight; plus;
-                        exclamation; alphanumeric; whitespace;
-                        slashFd; slashBk; asterisk; colon;
-                    ]
+let stringChars =
+    parseParserList [
+        apostrophe; dollar; semiColon; comma; equals; bkSqLeft; bkSqRight;
+        bkAgLeft; bkAgRight; bkClLeft; bkClRight; bkLeft; bkRight; plus;
+        exclamation; alphanumeric; whitespace; slashFd; slashBk; asterisk;
+        colon; minus; underscore; questionMark;
+    ]
 
 let innerString = parseMany stringChars
                   |>> listToString
 
-let parseComment = parseString "(*\"" ++ innerString ++ parseString "\"*)"
+let parseComment =
+    parseString "(*\"" ++ innerString ++ parseString "\"*)"
+    |>> ignore
 
-let ws = manyWs /> parseMany parseComment /> manyWs
+let ws = manyWs ++ parseMany parseComment ++ manyWs
          |>> ignore
          |>? ""
 
@@ -105,42 +113,50 @@ let pWsB p = ws /> p </ ws
 *)
 
 let pBool =
-    let parseTrue = parseString "true" |>>% VBool true
-    let parseFalse = parseString "false" |>>% VBool false
+    let parseTrue = parseString "true" |>>% Bool true
+    let parseFalse = parseString "false" |>>% Bool false
     parseTrue <|> parseFalse
     |>? "boolean"
 
 let pNumber =
-    let parseSign = parseOptional (parseString "-" <|> parseString "+")
+    let parseSign =
+        parseOptional (parseString "-" <|> parseString "+")
+        |> optToStr
     let digits = parseOneOrMore digit
                  |>> listToString
     let point = parseString "."
-    let pointOnwards = point ++ digits
-                       |>> tupleToString
+    let pointOnwards =
+        parseOptional (point ++ digits)
+        |>> (fun a ->
+            match a with
+            | None -> ""
+            | Some (b,c) -> b + c
+        )
 
-    ((parseSign ++ digits) |>> tupleToString) ++ parseOptional pointOnwards
+    ((parseSign ++ digits) |>> tupleToString) ++ pointOnwards
     |>> tupleToString
-    |>> VNumber
+    |>> Number
     |>? "number"
 
 let pString =
     quote /> innerString </ quote
-    |>> VString
+    |>> String
     |>? "string"
 
 let pNull =
     parseString "null"
-    |>>% VNull
+    |>>% Null
 
 let pArray =
     (bkSqLeft ++ ws) /> parseSeqMany parseValue (pWsB comma) </ pWsB bkSqRight
-    |>> VArray
+    |>> Array
     |>? "array"
 
-parseValueRef := parseParserList [
-                     pString; pBool; pNumber; pNull; pArray
-                 ]
-                 |>? "value"
+parseValueRef :=
+    parseParserList [
+        pNull; pArray; pBool; pNumber; pString;
+    ]
+    |>? "value"
 
 (*
     VARIABLE DECLARATION:
@@ -199,6 +215,7 @@ let parseOpCmp =
               pGreaterThanEqual; pGreaterThan
           ])
     |>> Comparison
+    |>? "comparison operator"
 
 let parseOpLog =
     let pAnd = parseString "&&"
@@ -207,8 +224,9 @@ let parseOpLog =
     let pOr =  parseString "||"
                 |>>% Or
 
-    ws /> (pAnd <|> pOr) </ ws
+    pWsB (pAnd <|> pOr)
     |>> Logical
+    |>? "logical operator"
 
 let parseOpMaths =
 
@@ -232,6 +250,7 @@ let parseOpMaths =
         pPlus; pMinus; pMultiply; pDivide
     ]
     |>> Maths
+    |>? "mathematical operator"
 
 let parseOperator =
     parseParserList [
@@ -245,10 +264,13 @@ let parseAtomic = parseValue
 let parseExpressionVariable = parseVarName
                               |>> EVariable
 
+
 let parseFnCall =
-    (parseName </ (ws ++ bkLeft)) ++
-    (pWsL (parseSeqMany parseExpression (comma ++ ws)))
-    </ bkRight
+    let parseParameterList =
+        pWsL (parseSeqMany parseExpression (comma ++ ws))
+        |>? "(parameter[,parameters])"
+
+    (parseName </ (ws ++ bkLeft)) ++ parseParameterList </ bkRight
 
 let parseExpressionFnCall = parseFnCall |>> EFnCall
      
@@ -290,8 +312,12 @@ let parseStatementDefinition =
     ws /> parseVarDeclare </ semiColon ++ ws
     |>> Definition
 
+let parseStatementVariableSet =
+    ws /> parseVarSet </ semiColon ++ ws
+    |>> VariableSet
+
 let parseStatementIf =
-    (ws ++ parseString "if") /> pWsB parseExpression ++ parseStatementBlock
+    (ws ++ parseString "if ") /> pWsB parseExpression ++ parseStatementBlock
     |>> If
     |>? "if statement"
 
@@ -304,8 +330,7 @@ let parseStatementForEach =
     |>? "foreach loop"
 
 let parseStatementWhile =
-    (pWsL (parseString "while") ++ pWsL bkLeft) />
-    (pWsB parseExpression </ pWsL bkRight) ++ parseStatementBlock
+    pWsL (parseString "while") /> pWsB parseExpression ++ parseStatementBlock
     |>> While
     |>? "while loop"
 
@@ -323,8 +348,9 @@ parseStatementReference :=
         parseStatementIf;
         parseStatementForEach;
         parseStatementWhile;
-        parseStatementFnCall;
         parseStatementReturn;
+        parseStatementFnCall;
+        parseStatementVariableSet;
     ]
     |>? " statement(s)"
 
@@ -341,3 +367,25 @@ let parseFunction =
     (ws ++ parseString "fn ") /> parseName ++ parseParameters ++ parseStatementBlock
     |>> reduceTupleLeft
     |>> Function
+    |>? "function"
+
+let listLastElement ls =
+    List.reduce (fun _ elem -> elem) ls
+
+/// Run the TOM Parser with specified input
+let runParser input =
+    // let result = parse (parseOneOrMore parseFunction) input
+    parse (parseOneOrMore parseFunction) input
+
+    // // Make sure the `main` function appears last in the file, otherwise
+    // // throw an error
+    // match result with
+    // | Err _ -> result
+    // | Ok { Value = fnList; Input = _; } ->
+    //     let lastFn = listLastElement fnList
+    //     let (Function (name, _, _)) = lastFn
+    //     if name = "main" then
+    //         result
+    //     else
+    //         Err ("main function", "Missing 'main' function (must be last)")
+

@@ -21,7 +21,11 @@
 let revFile filePath =
  try
   let lines = System.IO.File.ReadLines(filePath)
-  lines |> Seq.rev |> Seq.iter (fun x -> printfn "%s" x)
+
+  lines
+  |> Seq.rev
+  |> Seq.iter (fun x -> printfn "%s" x)
+
  with
  | :? System.IO.FileNotFoundException -> printfn "tac: failed to open '%s' for reading: No such file or directory" filePath
 
